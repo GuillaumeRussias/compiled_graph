@@ -37,7 +37,7 @@ setup(
     version=__version__,
     author="Team_mopsi",
     url="mandatory but useless",
-    description="homemae compiled graph library",
+    description="homemade compiled graph library",
     ext_modules=ext_modules,
     # Currently, build_ext only provides an optional "highest supported C++
     # level" feature, but in the future it may provide more features.
