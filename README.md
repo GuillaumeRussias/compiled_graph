@@ -1,5 +1,5 @@
 # Compiled Graph
-Petite bibilothèque c++ interfacée avec pyhton pour la gestion de graph.
+Petite bibilothèque c++ interfacée avec python pour la gestion de graph.
 
 # Installation :
 -Git Bash :
