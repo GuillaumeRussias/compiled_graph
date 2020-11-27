@@ -1,7 +1,7 @@
 # Compiled Graph
 Petite bibilothèque c++ interfacée avec pyhton pour la gestion de graph.
 
-# Instalation :
+# Installation :
 -Git Bash :
   git clone url
 
