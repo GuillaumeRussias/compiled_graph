@@ -74,3 +74,27 @@ print(path)
 print("====test 2======")
 path = G2.time_path_finder(0,3,0)
 print(path)
+
+
+graph="""
+==========TEST3============= 
+   0 <---> 1 <---> 4 <---> 5
+   ^       ^               ^
+   |       |               |
+   v       v               |
+   3 <---> 2<-------------/
+cout unitaire , compute (4,2) puis (5,3) puis (0,2) puis (1,3) puis (5,0)
+"""
+print(graph)
+G3=fast_graph.graph(6)
+G3.build_free_edges(numpy.array([0,0,1,1,1,2,2,2,3,3,4,4,5,5]),numpy.array([1,3,0,2,4,3,1,5,0,2,1,5,4,2]),numpy.array([1,1,1,1,1,1,1,1,1,1,1,1,1,1]))
+path = G3.basic_path_finder(4,2)
+print(path)
+path = G3.basic_path_finder(5,3)
+print(path)
+path = G3.basic_path_finder(0,2)
+print(path)
+path = G3.basic_path_finder(1,3)
+print(path)
+path = G3.basic_path_finder(5,0)
+print(path)
