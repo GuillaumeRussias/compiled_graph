@@ -127,7 +127,7 @@ void graph::push_free_edge(int departure_index, int arrival_index, int cost) {
     e_list.back()->key = e_list.size() - 1;
 }
 void graph::build_scheduled_edges(py::array_t<int> departure_index, py::array_t<int> arrival_index, py::array_t<int> departure_time, py::array_t<int> arrival_time){ 
-    int last_dep = -1; int last_arr = -1; int dep = -1; int arr = -1;
+    int dep,arr;
     auto departure = departure_index.unchecked<1>();
     auto arrival = arrival_index.unchecked<1>();
     auto departure_t = departure_time.unchecked<1>();
@@ -136,13 +136,11 @@ void graph::build_scheduled_edges(py::array_t<int> departure_index, py::array_t<
     for (int i = 0; i < departure.shape(0); i++) {
         dep = int(departure(i));
         arr = int(arrival(i));
-        if (last_dep == dep && last_arr == arr) {
-            e_list.back()->push_time(int (departure_t(i)),int(arrival_t(i)));
+        try {
+            this->operator[](dep)->operator[](arr)->push_time(int (departure_t(i)),int(arrival_t(i))); //on ajoute les horaires departs arrivee si l'edge est deja definie'
         }
-        else {
-            push_scheduled_edge(dep, arr, int(departure_t(i)), int(arrival_t(i)));
-            last_dep = dep;
-            last_arr = arr;
+        catch (invalid_argument) {
+            push_scheduled_edge(dep, arr, int(departure_t(i)), int(arrival_t(i))); //sinon on cree une nouvelle edge
         }
     }
 }
