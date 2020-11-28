@@ -24,7 +24,7 @@ void vertex::push_neihghbour(vertex* neighbour) {
 void vertex::push_edge(edge* edge) {
     edges.push_back(edge);
 }
-edge* vertex::operator[](const int& j){
+edge* vertex::operator[](int j){
     for (unsigned k = 0; k < neighbours.size(); k++) {
         if (neighbours[k]->i == j) {
             return edges.at(k);
@@ -33,7 +33,7 @@ edge* vertex::operator[](const int& j){
     throw invalid_argument("These vertices are not linked");
 }
 
-vertex* vertex::get_neighbour(const int& j){
+vertex* vertex::get_neighbour(int j){
     return neighbours.at(j);
 }
 
@@ -45,46 +45,41 @@ int vertex::get_index(){
     return i;
 }
 
-int vertex::cost_of_travel(const int& j) {
+int vertex::cost_of_travel(int j) {
     return edges.at(j)->cost();
 }
-int vertex::cost_of_travel(const int& j, int time) {
+int vertex::cost_of_travel(int j, int time) {
     return edges.at(j)->cost(time);
 }
 
 
-edge::edge(const int& size_departure_time, const int& size_arrival_time) {
-    assertm(size_departure_time == size_arrival_time, "On an edge size of departure and arrival times must be equals");
-    departure_time = vector<int>(size_departure_time);
-    arrival_time = vector<int>(size_arrival_time);
-    type = "common";
-}
-edge::edge(int cost) {
-    type = "walk";
-    transfers_cost = cost;
-}
-void edge::set_time(const int index, const int& t_departure, const int& t_arrival) {
-    if (index >= int(departure_time.size()) || index < 0 || index >= int(arrival_time.size())) throw out_of_range("can't set departure and arrival time because the index is out of range");
-    departure_time[index] = t_departure;
-    arrival_time[index] = t_arrival;
+edge::edge(int departure_t, int arrival_t) {
+    departure_time.push_back(departure_t);
+    arrival_time.push_back(arrival_t);
+    type = "scheduled";
 }
 
-string edge::repr(){
-    return "Edge of type : " + type;
+void edge::push_time(int t_departure, int t_arrival) {
+    departure_time.push_back(t_departure);
+    arrival_time.push_back(t_arrival);
+}
+edge::edge(int cost) {
+    type = "free";
+    transfers_cost = cost;
 }
 
 int edge::cost() { 
-    if (type == "walk")return transfers_cost;
+    if (type == "free")return transfers_cost;
     return day;
 }
 
 int edge::cost(int time){
-    if (type == "common") mission(time);
+    if (type == "scheduled") mission(time);
     return transfers_cost;
 }
 
 void edge::mission(int time){
-    if (type == "walk") throw invalid_argument("this edge must be a common_edge, not a walking edge");
+    if (type == "free") throw invalid_argument("this edge must be a scheduled_edge, not a free edge");
     int cost;
     int min = 100*day;
     int i_min = -1;
@@ -101,7 +96,7 @@ void edge::mission(int time){
     selected_mission = i_min;
 }
 
-graph::graph(const int& size_v) {
+graph::graph(int size_v) {
     v_list = vector<vertex*>(size_v);
     for (int i = 0; i < size_v; i++) {
         v_list[i] = new vertex(i);
@@ -117,42 +112,50 @@ graph::~graph() {
     }
 }
 
-void graph::push_common_edge(int departure_index, int arrival_index, const int& size_departure_time, const int& size_arrival_time) {
+void graph::push_scheduled_edge(int departure_index, int arrival_index, int departure_time, int arrival_time) {
     if (departure_index >= int(v_list.size()) || departure_index < 0 || arrival_index >=int( v_list.size())|| arrival_index < 0) throw out_of_range("can't push an edge with vertices not in the graph");
-    e_list.push_back(new edge(size_departure_time, size_arrival_time));
+    e_list.push_back(new edge(departure_time, arrival_time));
     v_list[departure_index]->push_neihghbour(v_list[arrival_index]);
     v_list[departure_index]->push_edge(e_list.back());
+    e_list.back()->key = e_list.size()-1;
 }
-void graph::push_walk_edge(int departure_index, int arrival_index, int cost) {
+void graph::push_free_edge(int departure_index, int arrival_index, int cost) {
     if (departure_index >= int(v_list.size()) || departure_index < 0 || arrival_index >= int(v_list.size()) || arrival_index < 0) throw out_of_range("can't push an edge with vertices not in the graph");
     e_list.push_back(new edge(cost));
     v_list[departure_index]->push_neihghbour(v_list[arrival_index]);
     v_list[departure_index]->push_edge(e_list.back());
+    e_list.back()->key = e_list.size() - 1;
 }
-void graph::build_common_edges(py::array_t<int> departure_index, py::array_t<int> arrival_index, py::array_t<int> departure_time, py::array_t<int> arrival_time){    
+void graph::build_scheduled_edges(py::array_t<int> departure_index, py::array_t<int> arrival_index, py::array_t<int> departure_time, py::array_t<int> arrival_time){ 
+    int last_dep = -1; int last_arr = -1; int dep = -1; int arr = -1;
     auto departure = departure_index.unchecked<1>();
     auto arrival = arrival_index.unchecked<1>();
-    auto departure_t = departure_time.unchecked<2>();
-    auto arrival_t = arrival_time.unchecked<2>();
-    int max_times = departure_t.shape(1);
+    auto departure_t = departure_time.unchecked<1>();
+    auto arrival_t = arrival_time.unchecked<1>();
     assertm((departure.shape(0) == arrival.shape(0) && departure_t.shape(0) == arrival_t.shape(0) && arrival.shape(0) == departure_t.shape(0)),"departure_index ,arrival_index,departure_time,arrival_time must have same shape(0)" );
     for (int i = 0; i < departure.shape(0); i++) {
-        push_common_edge(int(departure(i)), int(arrival(i)), max_times, max_times);
-        for (int j = 0; j < max_times; j++) {
-            e_list.back()->set_time(j, int(departure_t(i, j)), int(arrival_t(i, j)));
+        dep = int(departure(i));
+        arr = int(arrival(i));
+        if (last_dep == dep && last_arr == arr) {
+            e_list.back()->push_time(int (departure_t(i)),int(arrival_t(i)));
+        }
+        else {
+            push_scheduled_edge(dep, arr, int(departure_t(i)), int(arrival_t(i)));
+            last_dep = dep;
+            last_arr = arr;
         }
     }
 }
-void graph::build_walk_edges(py::array_t<int> departure_index, py::array_t<int> arrival_index, py::array_t<int> cost) {
+void graph::build_free_edges(py::array_t<int> departure_index, py::array_t<int> arrival_index, py::array_t<int> cost) {
     auto departure = departure_index.unchecked<1>();
     auto arrival = arrival_index.unchecked<1>();
     auto cost_w = cost.unchecked<1>();
     assertm((departure.shape(0) == arrival.shape(0) && cost.shape(0) == arrival.shape(0)), "departure_index, arrival_index,cost must have same shape(0)");
     for (int i = 0; i < departure.shape(0); i++) {
-        push_walk_edge(int(departure(i)), int(arrival(i)), int(cost_w(i)));
+        push_free_edge(int(departure(i)), int(arrival(i)), int(cost_w(i)));
     }
 }
-vertex* graph::operator[](const int &i){
+vertex* graph::operator[](int i){
     try { return v_list.at(i); }
     catch (out_of_range) { throw invalid_argument("This vertex is not in the graph"); } //conversion d'erreur , on veut une ValueError en pyhton = invalid_argument en cpp
 }
@@ -166,7 +169,7 @@ void graph::initialised(){
 
 //alogorithms
 
-void graph::basic_djikstra(const int& start_vertex_index) { // time independent
+void graph::basic_djikstra(int start_vertex_index) { // time independent
     //initialisation
     vertex* top = v_list[start_vertex_index];
     vertex* neighbour;
@@ -196,7 +199,7 @@ void graph::basic_djikstra(const int& start_vertex_index) { // time independent
     }
 }
 
-void graph::time_djikstra(const int& start_vertex_index, int t) { // time dependent
+void graph::time_djikstra(int start_vertex_index, int t) { // time dependent
     //initialisation
     vertex* top = v_list[start_vertex_index];
     vertex* neighbour;
@@ -225,7 +228,7 @@ void graph::time_djikstra(const int& start_vertex_index, int t) { // time depend
         }
     }
 }
-void graph::stop_basic_djikstra(const int& start_vertex_index, const int& end_vertex_index){
+void graph::stop_basic_djikstra(int start_vertex_index, int end_vertex_index){
     vertex* top = v_list[start_vertex_index];
     vertex* neighbour;
     int cost;
@@ -253,7 +256,7 @@ void graph::stop_basic_djikstra(const int& start_vertex_index, const int& end_ve
         }
     }
 }
-void graph::stop_time_djikstra(const int& start_vertex_index, const int& end_vertex_index, int t ){
+void graph::stop_time_djikstra(int start_vertex_index, int end_vertex_index, int t ){
     vertex* top = v_list[start_vertex_index];
     vertex* neighbour;
     int cost;
@@ -281,7 +284,7 @@ void graph::stop_time_djikstra(const int& start_vertex_index, const int& end_ver
         }
     }
 }
-vector<int> graph::path_finder(const int& start_vertex_index, const int& end_vertex_index) {
+vector<int> graph::path_finder(int start_vertex_index, int end_vertex_index) {
     vector<int> path;
     stop_basic_djikstra(start_vertex_index, end_vertex_index);
     int index = end_vertex_index;
@@ -297,7 +300,7 @@ vector<int> graph::path_finder(const int& start_vertex_index, const int& end_ver
     return path;
 
 }
-vector<int> graph::path_finder_time(const int& start_vertex_index, const int& end_vertex_index, int t){
+vector<int> graph::path_finder_time(int start_vertex_index, int end_vertex_index, int t){
     vector<int> path;
     stop_time_djikstra(start_vertex_index, end_vertex_index,t);
     int index = end_vertex_index;
