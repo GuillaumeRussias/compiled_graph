@@ -13,6 +13,7 @@ namespace py = pybind11;
 #include <algorithm>
 #include <vector>
 #include <queue>
+#include <deque>
 
 using namespace std;
 
@@ -29,25 +30,32 @@ public:
     int getNumber();
 };
 
-class edge {    
-    string type; //"free" or "scheduled" -> mandatory to separate transfers(no schedule constraints) from scheduled transportation (scheduled)
+class edge {
+    string type; //"free","scheduled","mixed"-> mandatory to separate transfers(no schedule constraints) from scheduled transportation (scheduled)
     vector<int> departure_time; //" departure times . empty if type=="free" . time in seconds
     vector<int> arrival_time; //" arrival times . empty if type=="free" . time in seconds
-    int transfers_cost; // cost in seconds of the transfers (define in condtructor iff type==free, define after mission() iff type==scheduled)
-    int selected_mission;  //selected mission (define after mission() iff type==scheduled)
+    int free_cost; // cost in second of the free transfers (equals to 100*day for a sheduled edge)
+    int transfers_cost; // cost in seconds of the transfers (define after cost() or cost(t))
+    int selected_mission;  //selected mission (define after cost() or cost(t)) = -1 if mission is not sheduled , index of the departure_time arrival_time selected either
     void mission(int time);//compute the appropriate mission i of this edge (min time_arrival[i]) s.t (time < time departure[i]), throw exception if called for a free edge
 public :
     int key; //index in e_list
     edge(int departure_t, int arrival_t); //scheduled constructor
     edge(int cost); //free constructor
-    void push_time(int t_departure, int t_arrival); //push t_departure, t_arrival
 
-    int cost(); //time independent : totaly ignore edges of type scheduled , works with distance graph 
+    void push_time(int t_departure, int t_arrival); //push t_departure, t_arrival
+    void set_free_cost(int cost);// set free_cost = cost
+
+    int cost(); //time independent : totaly ignore edges of type scheduled , works with distance graph
     int cost(int time); //time dependent : works with both gtfs,old graph but takes more time to compute.
+
+    string get_type();
+    pair<int,int> get_selected_mission();
+    int get_transfers_cost();
     };
 
 
-class vertex { 
+class vertex {
     int i; //index of the vertex = key
     vector<vertex*> neighbours; //list of neighbours
     vector<edge*> edges; //list of spec of the edge  between this vertex and its neighbours : neighbours[i] <-> edges[i]
@@ -60,12 +68,21 @@ public :
     vertex(int index); // constructor
     void push_neihghbour(vertex* neighbour); // add a neighbour
     void push_edge(edge* edge);// add an edge
-    unsigned number_neighbour();//returns size of neighbours
-    int get_index();//returns this->i;
-    vertex* get_neighbour(int j); // safe access to the jth neighbour of this vertex
-    int cost_of_travel(int j); //returns the cost of the edge between this vertex and the its jth neighbour. time independent
-    int cost_of_travel(int j, int time); //returns the cost of the edge between this vertex and the its jth neighbour. time dependent
+
     edge* operator[](int j);//safe access to the edge (if it exists) between this and j !return_value_policy::reference! we want c++ to be in charge of the destruction of this object
+
+    //user interface
+    vector<int> get_neighbours();
+    int get_time();
+    bool get_visited();
+    int get_predecessor();
+
+    //inline
+    inline int get_index(){return i;}
+    inline vertex* get_neighbour(int j){return neighbours[j];}
+    inline unsigned number_neighbour(){return neighbours.size();}
+    inline int cost_of_travel(int j) {return edges[j]->cost();}//returns the cost of the edge between this vertex and the its jth neighbour. time independent
+    inline int cost_of_travel(int j, int time) {return edges[j]->cost(time);}//returns the cost of the edge between this vertex and the its jth neighbour. time dependent
 };
 
 
@@ -73,7 +90,7 @@ class graph {
     vector<vertex*> v_list; //list of vertices
     vector<edge*> e_list; //list of edges
     void push_free_edge(int departure_index, int arrival_index, int cost); //push a single free edge
-    void push_scheduled_edge(int departure_index, int arrival_index, int departure_time, int arrival_time); //push a single scheduled edge 
+    void push_scheduled_edge(int departure_index, int arrival_index, int departure_time, int arrival_time); //push a single scheduled edge
 public :
     //tools functions
     graph(int size_v); //constructor
@@ -84,9 +101,9 @@ public :
     void initialised(); //set all (visited,time) at (false,7*day)
 
     //algorithms : carefull : graph needs to be re-initialised (visited, time) after the execution of these 4 algorithms
-    void basic_djikstra(int start_vertex_index); //basic djikstra 
+    void basic_djikstra(int start_vertex_index); //basic djikstra
     void time_djikstra(int start_vertex_index, int t); //time dependant djikstra
-    void stop_basic_djikstra(int start_vertex_index, int end_vertex_index); //basic djikstra , with stop condition 
+    void stop_basic_djikstra(int start_vertex_index, int end_vertex_index); //basic djikstra , with stop condition
     void stop_time_djikstra(int start_vertex_index, int end_vertex_index, int t); //time dependant djikstra , with stop condition
 
     //user interface
@@ -97,7 +114,7 @@ public :
 
 class comparetime {
 public:
-    bool operator()( vertex* A, vertex* B ) {
-        return (A->time >= B->time);
+     inline bool operator()( vertex* A, vertex* B ) {
+        return (A->time > B->time);
     }
 };

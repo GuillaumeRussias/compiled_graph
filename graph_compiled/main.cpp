@@ -16,9 +16,16 @@ PYBIND11_MODULE(fast_graph, m){
         .def("getNumber", &myClass::getNumber)
         ;
     py::class_<edge>(m, "edge")
+            .def("type",&edge::get_type)
+            .def("selected_mission",&edge::get_selected_mission)
+            .def("transfers_cost",&edge::get_transfers_cost)
         ;
     py::class_<vertex>(m, "vertex")
             .def("__getitem__", &vertex::operator[], py::return_value_policy::reference)
+            .def("neighbours",&vertex::get_neighbours)
+            .def("time",&vertex::get_time)
+            .def("visited",&vertex::get_visited)
+            .def("predecessor",&vertex::get_predecessor)
         ;
     py::class_<graph>(m, "graph")
             .def(py::init<int>())
@@ -27,5 +34,5 @@ PYBIND11_MODULE(fast_graph, m){
             .def("__getitem__", &graph::operator[], py::return_value_policy::reference)
             .def("basic_path_finder",&graph::path_finder)
             .def("time_path_finder",&graph::path_finder_time)
-            ;
+        ;
 }
