@@ -3,7 +3,7 @@ Petite bibilothèque c++ interfacée avec python pour la gestion de graph.
 
 # Installation :
 - (1) 
-    - **Avec Git Bash**  : ouvrir Git Bash dans le répertoire dans lequel vous voulez téléchargez le projet: `git clone https://github.com/GuillaumeRussias/compiled_graph`
+    - **Avec Git Bash**  : ouvrir Git Bash dans le répertoire dans lequel vous voulez télécharger le projet: `git clone https://github.com/GuillaumeRussias/compiled_graph`
     - **Sans Git Bash** : téléchargez ce projet manuellement.
  
 - (2) 
