@@ -17,7 +17,7 @@ Petite bibilothèque c++ interfacée avec python pour la gestion de graph.
 # Tester :
 1. Vérifier que l'environnement dans lequel vous avez installé la bibliothèque possède numpy. sinon : `conda install numpy` ou `pip install numpy` .
 
-2. Exécuter `test_compiled_graph.py` . S'il n'ya pas d'erreur , l'installation fonctionne.
+2. Exécuter `test_compiled_graph.py` . S'il n'y a pas d'erreur , l'installation fonctionne.
 
 
 # Credits :
