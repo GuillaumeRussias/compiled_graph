@@ -137,7 +137,7 @@ graph::graph(int size_v) {
         }
     }
     else {
-        cerr<<"No correct size given in graph constructor, creating empty graph . Compute time is longer ."
+        cerr << "No correct size given in graph constructor, creating empty graph . Compute time is longer .";
     }
 }
 graph::~graph() {
