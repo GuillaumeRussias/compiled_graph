@@ -166,6 +166,7 @@ void graph::push_scheduled_edge(int departure_index, int arrival_index, int depa
     }
     catch (invalid_argument) { //sinon on cree une nouvelle edge
         push_vertex(departure_index);//si le sommet n'est pas deja defini, alors on le defini. siil est deja defini cette fonction ne fait rien
+        push_vertex(arrival_index);
         if (departure_index >= int(v_list.size()) || departure_index < 0 || arrival_index >= int(v_list.size()) || arrival_index < 0) throw out_of_range("can't push an edge with vertices not in the graph");//petit test
         e_list.push_back(new edge(departure_time, arrival_time));
         v_list[departure_index]->push_neihghbour(v_list[arrival_index]);
@@ -181,6 +182,7 @@ void graph::push_free_edge(int departure_index, int arrival_index, int cost) {
     }
     catch (invalid_argument) { //sinon on cree une nouvelle edge
         push_vertex(departure_index); //si le sommet n'est pas deja defini, alors on le defini. siil est deja defini cette fonction ne fait rien
+        push_vertex(arrival_index);
         if (departure_index >= int(v_list.size()) || departure_index < 0 || arrival_index >= int(v_list.size()) || arrival_index < 0) throw out_of_range("can't push an edge with vertices not in the graph"); //petit test
         e_list.push_back(new edge(cost));
         v_list[departure_index]->push_neihghbour(v_list[arrival_index]);
