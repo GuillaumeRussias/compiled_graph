@@ -214,9 +214,6 @@ void graph::build_free_edges(py::array_t<int> departure_index, py::array_t<int> 
     }
 }
 
-void graph::build_meta_data(py::array_t<string> route_id, py::array_t<object> fer_displayable, py::array_t<object> bus_displayable) {
-    auto r_id = route_id.unchecked<1>()
-}
 vertex* graph::operator[](int i){
     try { return v_list.at(i); }
     catch (out_of_range) { throw invalid_argument("This vertex is not in the graph"); } //conversion d'erreur , on veut une ValueError en pyhton = invalid_argument en cpp
