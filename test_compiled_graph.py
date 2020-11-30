@@ -17,6 +17,7 @@ def print_path(G,path):
 
 departs=numpy.array([0,1,2,3,2,1],dtype=int)
 arrivees=numpy.array([3,2,1,0,0,2],dtype=int)
+id = numpy.array([1,2,3,4,5,6])
 
 assert(numpy.max(departs)<nbV)
 assert(numpy.max(arrivees)<nbV)
@@ -26,7 +27,7 @@ assert (departs.size==arrivees.size)
 
 
 G=fast_graph.graph(nbV)
-G.build_scheduled_edges(departs,arrivees,departs,arrivees)
+G.build_scheduled_edges(departs,arrivees,departs,arrivees,id)
 
 vertex_0=G[0]
 print(vertex_0)
@@ -73,11 +74,11 @@ print(graph)
 
 G1=fast_graph.graph(4)
 G2=fast_graph.graph(4)
-G1.build_free_edges(numpy.array([0,1,2,3]),numpy.array([1,2,3,0]),numpy.array([1,1,1,1]))
+G1.build_free_edges(numpy.array([0,1,2,3]),numpy.array([1,2,3,0]),numpy.array([1,1,1,1]),numpy.array([0,1,2,3]))
 departure = numpy.array([0,0,0,2,0,3,4,2])
 arrival =numpy.array([1,2,1,3,1,4,5,3])
 
-G2.build_scheduled_edges(numpy.array([0,0,1,1,2,2,3,3]),numpy.array([1,1,2,2,3,3,0,0]),departure,arrival)
+G2.build_scheduled_edges(numpy.array([0,0,1,1,2,2,3,3]),numpy.array([1,1,2,2,3,3,0,0]),departure,arrival,numpy.array([0,0,1,1,2,2,3,3]))
 
 print("====test 1======")
 path = G1.basic_path_finder(0,3)
@@ -100,7 +101,7 @@ cout unitaire ,  A compute (4,2) , B(5,3), C(0,2), D (1,3), E (5,0)
 """
 print(graph)
 G3=fast_graph.graph(6)
-G3.build_free_edges(numpy.array([0,0,1,1,1,2,2,2,3,3,4,4,5,5]),numpy.array([1,3,0,2,4,3,1,5,0,2,1,5,4,2]),numpy.array([1,1,1,1,1,1,1,1,1,1,1,1,1,1]))
+G3.build_free_edges(numpy.array([0,0,1,1,1,2,2,2,3,3,4,4,5,5]),numpy.array([1,3,0,2,4,3,1,5,0,2,1,5,4,2]),numpy.array([1,1,1,1,1,1,1,1,1,1,1,1,1,1]),numpy.array([0,0,1,1,1,2,2,2,3,3,4,4,5,5]))
 path = G3.basic_path_finder(4,2)
 print("=======A=======")
 print(path)
@@ -147,8 +148,8 @@ on affiche successivement les voisins de chaque noeud
 G4 = fast_graph.graph(4)
 departure = numpy.array([0,0,0,0,0,2,3,2])
 arrival =numpy.array([1,1,1,5,2,3,4,3])
-G4.build_scheduled_edges(numpy.array([0,1,2,3,0,1,2,3]),numpy.array([1,2,3,0,1,2,3,0]),departure,arrival)
-G4.build_free_edges(numpy.array([0,1,2,3]),numpy.array([1,2,3,0]),numpy.array([1,1,1,1]))
+G4.build_scheduled_edges(numpy.array([0,1,2,3,0,1,2,3]),numpy.array([1,2,3,0,1,2,3,0]),departure,arrival,numpy.array([0,1,2,3,0,1,2,3]))
+G4.build_free_edges(numpy.array([0,1,2,3]),numpy.array([1,2,3,0]),numpy.array([1,1,1,1]),numpy.array([0,1,2,3]))
 print(graph)
 def print_voisin(G,i):
 	print("----noeud",i,"----")
@@ -161,8 +162,8 @@ print(path)
 print_path(G4,path)
 
 
-print("========TEST5================")
-n = 50
+print("========TEST5================BIG GRAPH=============")
+n = 500
 departs = []
 arrivees = []
 for i in range(n-1):
@@ -175,6 +176,6 @@ for i in range(n-1):
 GG=fast_graph.graph((n+1)**2)
 d = numpy.array(departs)
 a = numpy.array(arrivees)
-GG.build_free_edges(d,a,numpy.ones(d.size -1))
+GG.build_free_edges(d,a,numpy.ones(d.size -1),numpy.ones(d.size -1))
 path=GG.time_path_finder(0,2000,0)
 print(path)

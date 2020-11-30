@@ -159,7 +159,7 @@ void graph::push_vertex(int index) {
     }
 }
 
-void graph::push_scheduled_edge(int departure_index, int arrival_index, int departure_time, int arrival_time) {
+void graph::push_scheduled_edge(int departure_index, int arrival_index, int departure_time, int arrival_time, int id) {
     assertm(arrival_time>=departure_time, "negative cost not allowed");
     try {
         this->operator[](departure_index)->operator[](arrival_index)->push_time(departure_time, arrival_time); //on ajoute les horaires departs et arrivee si l'edge est deja definie
@@ -171,11 +171,11 @@ void graph::push_scheduled_edge(int departure_index, int arrival_index, int depa
         e_list.push_back(new edge(departure_time, arrival_time));
         v_list[departure_index]->push_neihghbour(v_list[arrival_index]);
         v_list[departure_index]->push_edge(e_list.back());
-        e_list.back()->key = e_list.size() - 1;
+        e_list.back()->id = id;
     }
 }
 
-void graph::push_free_edge(int departure_index, int arrival_index, int cost) {
+void graph::push_free_edge(int departure_index, int arrival_index, int cost, int id) {
     assertm(cost>=0, "negative cost not allowed");
     try {
         this->operator[](departure_index)->operator[](arrival_index)->set_free_cost(cost); //on ajoute la liaison libre si l'edge est deja definie
@@ -187,29 +187,35 @@ void graph::push_free_edge(int departure_index, int arrival_index, int cost) {
         e_list.push_back(new edge(cost));
         v_list[departure_index]->push_neihghbour(v_list[arrival_index]);
         v_list[departure_index]->push_edge(e_list.back());
-        e_list.back()->key = e_list.size() - 1;
+        e_list.back()->id = id;
     }
 }
 
-void graph::build_scheduled_edges(py::array_t<int> departure_index, py::array_t<int> arrival_index, py::array_t<int> departure_time, py::array_t<int> arrival_time){
+void graph::build_scheduled_edges(py::array_t<int> departure_index, py::array_t<int> arrival_index, py::array_t<int> departure_time, py::array_t<int> arrival_time, py::array_t<int> edge_id){
     int dep,arr;
     auto departure = departure_index.unchecked<1>();
     auto arrival = arrival_index.unchecked<1>();
     auto departure_t = departure_time.unchecked<1>();
     auto arrival_t = arrival_time.unchecked<1>();
-    assertm((departure.shape(0) == arrival.shape(0) && departure_t.shape(0) == arrival_t.shape(0) && arrival.shape(0) == departure_t.shape(0)),"departure_index ,arrival_index,departure_time,arrival_time must have same shape(0)" );
+    auto id = edge_id.unchecked<1>();
+    assertm((departure.shape(0) == arrival.shape(0) && departure_t.shape(0) == arrival_t.shape(0) && arrival.shape(0) == departure_t.shape(0), departure_t.shape(0)==id.shape(0)),"departure_index ,arrival_index,departure_time,arrival_time must have same shape(0)" );
     for (int i = 0; i < departure.shape(0); i++) {
-        push_scheduled_edge(int(departure(i)), int(arrival(i)), int(departure_t(i)), int(arrival_t(i)));
+        push_scheduled_edge(int(departure(i)), int(arrival(i)), int(departure_t(i)), int(arrival_t(i)), int(id(i)));
     }
 }
-void graph::build_free_edges(py::array_t<int> departure_index, py::array_t<int> arrival_index, py::array_t<int> cost) {
+void graph::build_free_edges(py::array_t<int> departure_index, py::array_t<int> arrival_index, py::array_t<int> cost , py::array_t<int> edge_id) {
     auto departure = departure_index.unchecked<1>();
     auto arrival = arrival_index.unchecked<1>();
     auto cost_w = cost.unchecked<1>();
-    assertm((departure.shape(0) == arrival.shape(0) && cost.shape(0) == arrival.shape(0)), "departure_index, arrival_index,cost must have same shape(0)");
+    auto id = edge_id.unchecked<1>();
+    assertm((departure.shape(0) == arrival.shape(0) && cost.shape(0) == arrival.shape(0), cost.shape(0)==id.shape(0)), "departure_index, arrival_index,cost must have same shape(0)");
     for (int i = 0; i < departure.shape(0); i++) {
-        push_free_edge(int(departure(i)), int(arrival(i)), int(cost_w(i)));
+        push_free_edge(int(departure(i)), int(arrival(i)), int(cost_w(i)), int(id(i)));
     }
+}
+
+void graph::build_meta_data(py::array_t<string> route_id, py::array_t<object> fer_displayable, py::array_t<object> bus_displayable) {
+    auto r_id = route_id.unchecked<1>()
 }
 vertex* graph::operator[](int i){
     try { return v_list.at(i); }

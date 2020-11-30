@@ -39,7 +39,7 @@ class edge {
     int selected_mission;  //selected mission (define after cost() or cost(t)) = -1 if mission is not sheduled , index of the departure_time arrival_time selected either
     void mission(int time);//compute the appropriate mission i of this edge (min time_arrival[i]) s.t (time < time departure[i]), throw exception if called for a free edge
 public :
-    int key; //index in e_list
+    int id; //id of the edge (index of its first appearance in build_edges functions)
     edge(int departure_t, int arrival_t); //scheduled constructor
     edge(int cost); //free constructor
 
@@ -89,15 +89,16 @@ public :
 class graph {
     vector<vertex*> v_list; //list of vertices
     vector<edge*> e_list; //list of edges
-    void push_free_edge(int departure_index, int arrival_index, int cost); //push a single free edge
-    void push_scheduled_edge(int departure_index, int arrival_index, int departure_time, int arrival_time); //push a single scheduled edge
+    void push_free_edge(int departure_index, int arrival_index, int cost, int id); //push a single free edge
+    void push_scheduled_edge(int departure_index, int arrival_index, int departure_time, int arrival_time,int id); //push a single scheduled edge
     void push_vertex(int index); //push a vertex
 public :
     //tools functions
     graph(int size_v); //constructor
     ~graph();//destructor
-    void build_scheduled_edges(py::array_t<int> departure_index, py::array_t<int> arrival_index, py::array_t<int> departure_time, py::array_t<int> arrival_time); //construct all scheduled edges
-    void build_free_edges(py::array_t<int> departure_index, py::array_t<int> arrival_index, py::array_t<int> cost); //construct all free edges
+    void build_scheduled_edges(py::array_t<int> departure_index, py::array_t<int> arrival_index, py::array_t<int> departure_time, py::array_t<int> arrival_time , py::array_t<int> edge_id); //construct all scheduled edges
+    void build_free_edges(py::array_t<int> departure_index, py::array_t<int> arrival_index, py::array_t<int> cost, py::array_t<int> edge_id); //construct all free edges
+    void build_meta_data(py::array_t<string> route_id, py::array_t<object> fer_displayable, py::array_t<object> bus_displayable); //construct metadata
     vertex* operator[](int i); //safe access to the ith vertex of the graph !return_value_policy::reference! we want c++ to be in charge of the destruction of this object
     void initialised(); //set all (visited,time) at (false,7*day)
 
