@@ -129,6 +129,10 @@ int edge::get_transfers_cost(){
   return transfers_cost;
 }
 
+int edge::get_id(){
+    return id;
+}
+
 graph::graph(int size_v) {
     if (size_v > 0) {
         v_list = vector<vertex*>(size_v);

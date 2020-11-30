@@ -49,9 +49,11 @@ public :
     int cost(); //time independent : totaly ignore edges of type scheduled , works with distance graph
     int cost(int time); //time dependent : works with both gtfs,old graph but takes more time to compute.
 
-    string get_type();
-    pair<int,int> get_selected_mission();
-    int get_transfers_cost();
+    string get_type(); //returns type
+    pair<int,int> get_selected_mission(); //returns departure_time,arrival_time of selected traject . Intresting after path_finder
+    int get_transfers_cost(); //returns cost of the transfers. Intresting after path_finder
+    int get_id(); //returns id
+
     };
 
 

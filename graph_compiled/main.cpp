@@ -6,19 +6,14 @@ namespace py = pybind11;
 
 PYBIND11_MODULE(fast_graph, m){
     m.doc() = R"pbdoc(
-        Pybind11 example plugin
-
+        A compiled graph library : 3 classes vertex,edge,graph
     )pbdoc";
 
-    py::class_<myClass>(m, "myClass")
-        .def(py::init<>())
-        .def("addOne", &myClass::addOne)
-        .def("getNumber", &myClass::getNumber)
-        ;
     py::class_<edge>(m, "edge")
             .def("type",&edge::get_type)
             .def("selected_mission",&edge::get_selected_mission)
             .def("transfers_cost",&edge::get_transfers_cost)
+            .def("id",&edge::get_id)
         ;
     py::class_<vertex>(m, "vertex")
             .def("__getitem__", &vertex::operator[], py::return_value_policy::reference)
