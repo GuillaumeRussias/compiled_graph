@@ -12,7 +12,7 @@ Petite bibilothèque c++ interfacée avec python pour la gestion de graph.
 
 - (3) 
     - **Avec anaconda** : AnacondaPrompt -> activer un environnement -> aller dans le répertoire **parent** du projet -> `pip install ./compiled_graph`  .
-    - **Avec un bash**  : bash -> aller dans le répertoire du projet -> `python -m pip install ./compiled_graph` .
+    - **Avec un bash**  : bash -> aller dans le répertoire du projet -> `python -m pip install ../compiled_graph` .
 
 # Tester :
 1. Vérifier que l'environnement dans lequel vous avez installé la bibliothèque possède numpy. sinon : `conda install numpy` ou `pip install numpy` .
