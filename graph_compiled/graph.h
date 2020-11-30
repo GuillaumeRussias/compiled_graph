@@ -90,7 +90,7 @@ class graph {
     vector<vertex*> v_list; //list of vertices
     vector<edge*> e_list; //list of edges
     void push_free_edge(int departure_index, int arrival_index, int cost, int id); //push a single free edge
-    void push_scheduled_edge(int departure_index, int arrival_index, int departure_time, int arrival_time,int id); //push a single scheduled edge
+    void push_scheduled_edge(int departure_index, int arrival_index, int departure_time, int arrival_time, int id); //push a single scheduled edge
     void push_vertex(int index); //push a vertex
 public :
     //tools functions
@@ -98,7 +98,6 @@ public :
     ~graph();//destructor
     void build_scheduled_edges(py::array_t<int> departure_index, py::array_t<int> arrival_index, py::array_t<int> departure_time, py::array_t<int> arrival_time , py::array_t<int> edge_id); //construct all scheduled edges
     void build_free_edges(py::array_t<int> departure_index, py::array_t<int> arrival_index, py::array_t<int> cost, py::array_t<int> edge_id); //construct all free edges
-    void build_meta_data(py::array_t<string> route_id, py::array_t<object> fer_displayable, py::array_t<object> bus_displayable); //construct metadata
     vertex* operator[](int i); //safe access to the ith vertex of the graph !return_value_policy::reference! we want c++ to be in charge of the destruction of this object
     void initialised(); //set all (visited,time) at (false,7*day)
 
