@@ -130,9 +130,14 @@ int edge::get_transfers_cost(){
 }
 
 graph::graph(int size_v) {
-    v_list = vector<vertex*>(size_v);
-    for (int i = 0; i < size_v; i++) {
-        v_list[i] = new vertex(i);
+    if (size_v > 0) {
+        v_list = vector<vertex*>(size_v);
+        for (int i = 0; i < size_v; i++) {
+            v_list[i] = new vertex(i);
+        }
+    }
+    else {
+        cerr<<"No correct size given in graph constructor, creating empty graph . Compute time is longer ."
     }
 }
 graph::~graph() {
@@ -145,25 +150,38 @@ graph::~graph() {
     }
 }
 
+
+void graph::push_vertex(int index) {
+    int last = v_list.size() - 1;
+    while (index > last) {
+        last++;
+        v_list.push_back(new vertex(last));
+    }
+}
+
 void graph::push_scheduled_edge(int departure_index, int arrival_index, int departure_time, int arrival_time) {
     assertm(arrival_time>=departure_time, "negative cost not allowed");
     try {
         this->operator[](departure_index)->operator[](arrival_index)->push_time(departure_time, arrival_time); //on ajoute les horaires departs et arrivee si l'edge est deja definie
     }
     catch (invalid_argument) { //sinon on cree une nouvelle edge
-        if (departure_index >= int(v_list.size()) || departure_index < 0 || arrival_index >= int(v_list.size()) || arrival_index < 0) throw out_of_range("can't push an edge with vertices not in the graph");
+        push_vertex(departure_index);//si le sommet n'est pas deja defini, alors on le defini. siil est deja defini cette fonction ne fait rien
+        if (departure_index >= int(v_list.size()) || departure_index < 0 || arrival_index >= int(v_list.size()) || arrival_index < 0) throw out_of_range("can't push an edge with vertices not in the graph");//petit test
         e_list.push_back(new edge(departure_time, arrival_time));
         v_list[departure_index]->push_neihghbour(v_list[arrival_index]);
         v_list[departure_index]->push_edge(e_list.back());
         e_list.back()->key = e_list.size() - 1;
     }
 }
+
 void graph::push_free_edge(int departure_index, int arrival_index, int cost) {
+    assertm(cost>=0, "negative cost not allowed");
     try {
         this->operator[](departure_index)->operator[](arrival_index)->set_free_cost(cost); //on ajoute la liaison libre si l'edge est deja definie
     }
     catch (invalid_argument) { //sinon on cree une nouvelle edge
-        if (departure_index >= int(v_list.size()) || departure_index < 0 || arrival_index >= int(v_list.size()) || arrival_index < 0) throw out_of_range("can't push an edge with vertices not in the graph");
+        push_vertex(departure_index); //si le sommet n'est pas deja defini, alors on le defini. siil est deja defini cette fonction ne fait rien
+        if (departure_index >= int(v_list.size()) || departure_index < 0 || arrival_index >= int(v_list.size()) || arrival_index < 0) throw out_of_range("can't push an edge with vertices not in the graph"); //petit test
         e_list.push_back(new edge(cost));
         v_list[departure_index]->push_neihghbour(v_list[arrival_index]);
         v_list[departure_index]->push_edge(e_list.back());

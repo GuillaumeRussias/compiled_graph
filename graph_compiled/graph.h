@@ -91,6 +91,7 @@ class graph {
     vector<edge*> e_list; //list of edges
     void push_free_edge(int departure_index, int arrival_index, int cost); //push a single free edge
     void push_scheduled_edge(int departure_index, int arrival_index, int departure_time, int arrival_time); //push a single scheduled edge
+    void push_vertex(int index); //push a vertex
 public :
     //tools functions
     graph(int size_v); //constructor
